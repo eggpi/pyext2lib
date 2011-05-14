@@ -24,8 +24,8 @@ cdef extern from "ext2fs/ext2fs.h":
 	ctypedef struct_io_manager *io_manager
 	ctypedef ext2_struct_inode_scan *ext2_inode_scan
 
-	ctypedef int ext2_ino_t
-	ctypedef int blk_t
+	ctypedef unsigned int ext2_ino_t
+	ctypedef unsigned int blk_t
 
 	cdef io_manager unix_io_manager
 
