@@ -1,4 +1,3 @@
-from libc.stdlib cimport *
 from pyext2lib cimport *
 
 include "pyext2lib.pxi"
@@ -89,7 +88,6 @@ cdef class ExtInode:
 		if not ext2fs_inode_has_valid_blocks(&self.inode):
 			return []
 
-		#blks = <blk_t *> malloc(EXT2_N_BLOCKS * sizeof(blk_t))
 		if ext2fs_get_blocks(self.fs, self.number, blks):
 			raise ExtException("Can't get blocks for inode!")
 
@@ -99,5 +97,4 @@ cdef class ExtInode:
 			if blks[i]:
 				blocks.append(blks[i])
 
-		#free(blks)
 		return blocks
