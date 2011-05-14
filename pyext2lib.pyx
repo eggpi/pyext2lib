@@ -25,7 +25,8 @@ cpdef open(name, iomanager, flags = 0, superblock = 0, block_size = 0):
 
 cdef class ExtFS:
 	def __dealloc__(self):
-		self.close()
+		if self.fs:
+			self.close()
 
 	cpdef read_block_bitmap(self):
 		if ext2fs_read_block_bitmap(self.fs):
@@ -44,8 +45,13 @@ cdef class ExtFS:
 			raise ExtException("Can't flush filesystem!")
 
 	cpdef close(self):
+		if self.fs == NULL:
+			raise ExtException("Trying to close filesystem that wasng opened?")
+
 		if ext2fs_close(self.fs):
 			raise ExtException("Can't close filesystem!")
+
+		self.fs = NULL
 
 	cpdef iterinodes(self, flags = 0):
 		return ExtFSInodeIter(self, flags)
