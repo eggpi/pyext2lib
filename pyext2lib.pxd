@@ -65,7 +65,7 @@ cdef class ExtFS:
 	cpdef read_bitmaps(self)
 	cpdef flush(self)
 	cpdef close(self)
-	cpdef iterinodes(self, skip_missing_itable = ?)
+	cpdef iterinodes(self, flags = ?)
 
 cdef class ExtFSInodeIter:
 	cdef ext2_inode_scan scan
