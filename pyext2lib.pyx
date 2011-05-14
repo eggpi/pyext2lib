@@ -48,17 +48,18 @@ cdef class ExtFS:
 		if ext2fs_close(self.fs):
 			raise ExtException("Can't close filesystem!")
 
-	# TODO - Support all flags in ext2fs.h
 	cpdef iterinodes(self, flags = 0):
 		return ExtFSInodeIter(self, flags)
 
 cdef class ExtFSInodeIter:
-	def __init__(self, ExtFS extfs, flags):
+	def __cinit__(self, ExtFS extfs, flags):
+		self.extfs = extfs
+
 		if ext2fs_open_inode_scan(extfs.fs, 0, &self.scan):
 			raise ExtException("Can't open inode scan!")
 
 		if flags:
-			ext2fs_inode_scan_flags(self.scan, EXT2_SF_SKIP_MISSING_ITABLE, 0)
+			ext2fs_inode_scan_flags(self.scan, flags, 0)
 
 	def __dealloc__(self):
 		ext2fs_close_inode_scan(self.scan)
