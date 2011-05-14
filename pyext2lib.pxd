@@ -1,3 +1,4 @@
+# XXX Probably includes much more than we actually need/implement
 cdef extern from "ext2fs/ext2fs.h":
 	cdef struct struct_io_manager:
 		pass

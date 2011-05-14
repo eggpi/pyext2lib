@@ -1,11 +1,11 @@
+from libc.stdlib cimport *
 from pyext2lib cimport *
 
-IO_MANAGER_UNIX = 1
+include "pyext2lib.pxi"
 
 class ExtException(Exception):
 	pass
 
-# TODO - Add all flags in ext2fs.h
 cpdef open(name, iomanager, flags = 0, superblock = 0, block_size = 0):
 	cdef ext2_filsys fs
 	cdef io_manager iom
