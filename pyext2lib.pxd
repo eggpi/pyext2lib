@@ -25,6 +25,7 @@ cdef extern from "ext2fs/ext2fs.h":
 	ctypedef ext2_struct_inode_scan *ext2_inode_scan
 
 	ctypedef int ext2_ino_t
+	ctypedef int blk_t
 
 	cdef io_manager unix_io_manager
 
@@ -52,7 +53,15 @@ cdef extern from "ext2fs/ext2fs.h":
 	int ext2fs_inode_scan_flags(ext2_inode_scan scan, int set_flags, int
 								clear_flags)
 
-	int EXT2_SF_SKIP_MISSING_ITABLE
+	int ext2fs_get_blocks(ext2_filsys fs, ext2_ino_t ino, blk_t *blocks)
+	int ext2fs_inode_has_valid_blocks (ext2_inode *inode)
+
+	enum:
+		EXT2_NDIR_BLOCKS = 12
+		EXT2_IND_BLOCK = EXT2_NDIR_BLOCKS
+		EXT2_DIND_BLOCK = EXT2_IND_BLOCK + 1
+		EXT2_TIND_BLOCK = EXT2_DIND_BLOCK + 1
+		EXT2_N_BLOCKS = EXT2_TIND_BLOCK + 1
 
 cdef class ExtFS:
 	# XXX - Can't be instantiated directly as that leaves self.fs as NULL,
@@ -69,8 +78,13 @@ cdef class ExtFS:
 	cpdef iterinodes(self, flags = ?)
 
 cdef class ExtFSInodeIter:
+	cdef ExtFS extfs
 	cdef ext2_inode_scan scan
 
 cdef class ExtInode:
+	cdef ext2_filsys fs
 	cdef readonly int number
 	cdef ext2_inode inode
+
+	cpdef get_blocks(self)
+

@@ -68,7 +68,7 @@ cdef class ExtFSInodeIter:
 		return self
 
 	def __next__(self):
-		ret = ExtInode()
+		ret = ExtInode(self.extfs)
 
 		if ext2fs_get_next_inode(self.scan, &ret.number, &ret.inode):
 			raise ExtException("Can't get next inode!")
@@ -79,4 +79,25 @@ cdef class ExtFSInodeIter:
 		return ret
 
 cdef class ExtInode:
-	pass
+	def __cinit__(self, ExtFS extfs):
+		self.fs = extfs.fs
+
+	cpdef get_blocks(self):
+		cdef blk_t *blks
+		cdef char *name
+
+		if not ext2fs_inode_has_valid_blocks(&self.inode):
+			return []
+
+		blks = <blk_t *> malloc(EXT2_N_BLOCKS * sizeof(blk_t))
+		if ext2fs_get_blocks(self.fs, self.number, blks):
+			raise ExtException("Can't get blocks for inode!")
+
+		blocks = []
+		for i from 0 <= i < EXT2_N_BLOCKS:
+			# Skip holes (blocks whose number is zero)
+			if blks[i]:
+				blocks.append(blks[i])
+
+		free(blks)
+		return blocks
