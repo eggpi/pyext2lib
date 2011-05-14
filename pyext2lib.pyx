@@ -83,13 +83,13 @@ cdef class ExtInode:
 		self.fs = extfs.fs
 
 	cpdef get_blocks(self):
-		cdef blk_t *blks
+		cdef blk_t blks[EXT2_N_BLOCKS]
 		cdef char *name
 
 		if not ext2fs_inode_has_valid_blocks(&self.inode):
 			return []
 
-		blks = <blk_t *> malloc(EXT2_N_BLOCKS * sizeof(blk_t))
+		#blks = <blk_t *> malloc(EXT2_N_BLOCKS * sizeof(blk_t))
 		if ext2fs_get_blocks(self.fs, self.number, blks):
 			raise ExtException("Can't get blocks for inode!")
 
@@ -99,5 +99,5 @@ cdef class ExtInode:
 			if blks[i]:
 				blocks.append(blks[i])
 
-		free(blks)
+		#free(blks)
 		return blocks
