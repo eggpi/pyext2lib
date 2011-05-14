@@ -63,6 +63,12 @@ cdef extern from "ext2fs/ext2fs.h":
 		EXT2_TIND_BLOCK = EXT2_DIND_BLOCK + 1
 		EXT2_N_BLOCKS = EXT2_TIND_BLOCK + 1
 
+	int ext2fs_block_iterate (ext2_filsys fs, ext2_ino_t ino, int flags,
+							char *block_buf,
+							int (*func)(ext2_filsys fs, blk_t *blocknr,
+										int blockcnt, void	*private),
+							void *private)
+
 cdef class ExtFS:
 	# XXX - Can't be instantiated directly as that leaves self.fs as NULL,
 	# making all methods segfault. Instantiate only through open() or fix
@@ -87,4 +93,5 @@ cdef class ExtInode:
 	cdef ext2_inode inode
 
 	cpdef get_blocks(self)
+	cpdef block_iterate(self, func, flags = ?)
 
