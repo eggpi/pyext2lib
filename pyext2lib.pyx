@@ -56,6 +56,15 @@ cdef class ExtFS:
 	cpdef iterinodes(self, flags = 0):
 		return ExtFSInodeIter(self, flags)
 
+	cpdef read_inode(self, ino):
+		inode = ExtInode(self)
+
+		inode.number = ino
+		if ext2fs_read_inode(self.fs, ino, &inode.inode):
+			raise ExtException("Can't get inode!")
+
+		return inode
+
 cdef class ExtFSInodeIter:
 	def __cinit__(self, ExtFS extfs, flags):
 		self.extfs = extfs

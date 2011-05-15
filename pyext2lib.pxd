@@ -45,6 +45,8 @@ cdef extern from "ext2fs/ext2fs.h":
 									int start, unsigned int num,
 									void *out)
 
+	int ext2fs_read_inode(ext2_filsys fs, ext2_ino_t ino, ext2_inode *inode)
+
 	int ext2fs_open_inode_scan(ext2_filsys fs, int buffer_blocks,
 									ext2_inode_scan *ret_scan)
 	int ext2fs_get_next_inode(ext2_inode_scan scan, ext2_ino_t *ino,
@@ -82,6 +84,7 @@ cdef class ExtFS:
 	cpdef flush(self)
 	cpdef close(self)
 	cpdef iterinodes(self, flags = ?)
+	cpdef read_inode(self, ino)
 
 cdef class ExtFSInodeIter:
 	cdef ExtFS extfs
