@@ -65,6 +65,14 @@ cdef class ExtFS:
 
 		return inode
 
+	property device_name:
+		def __get__(self):
+			return self.fs.device_name
+
+	property blocksize:
+		def __get__(self):
+			return self.fs.blocksize
+
 cdef class ExtFSInodeIter:
 	def __cinit__(self, ExtFS extfs, flags):
 		self.extfs = extfs

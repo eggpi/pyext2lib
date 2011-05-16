@@ -3,6 +3,8 @@ cdef extern from "ext2fs/ext2fs.h":
 		pass
 
 	cdef struct struct_ext2_filsys:
+		char *device_name
+		unsigned int blocksize
 
 	cdef struct ext2_inode:
 		pass
