@@ -42,7 +42,7 @@ cdef extern from "ext2fs/ext2fs.h":
 								clear_flags)
 
 	int ext2fs_get_blocks(ext2_filsys fs, ext2_ino_t ino, blk_t *blocks)
-	int ext2fs_inode_has_valid_blocks (ext2_inode *inode)
+	int ext2fs_inode_has_valid_blocks(ext2_inode *inode)
 
 	enum:
 		EXT2_NDIR_BLOCKS = 12

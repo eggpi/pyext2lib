@@ -46,7 +46,7 @@ cdef class ExtFS:
 
 	cpdef close(self):
 		if self.fs == NULL:
-			raise ExtException("Trying to close filesystem that wasn't opened?")
+			raise ExtException("Tried to close filesystem that wasn't opened?")
 
 		if ext2fs_close(self.fs):
 			raise ExtException("Can't close filesystem!")
