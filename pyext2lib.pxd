@@ -91,7 +91,7 @@ cdef class ExtFSInodeIter:
 	cdef ext2_inode_scan scan
 
 cdef class ExtInode:
-	cdef ext2_filsys fs
+	cdef ExtFS extfs
 	cdef readonly int number
 	cdef ext2_inode inode
 

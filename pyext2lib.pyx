@@ -94,7 +94,7 @@ cdef class ExtFSInodeIter:
 
 cdef class ExtInode:
 	def __cinit__(self, ExtFS extfs):
-		self.fs = extfs.fs
+		self.extfs = extfs
 
 	cpdef get_blocks(self):
 		cdef blk_t blks[EXT2_N_BLOCKS]
@@ -103,7 +103,7 @@ cdef class ExtInode:
 		if not ext2fs_inode_has_valid_blocks(&self.inode):
 			return []
 
-		if ext2fs_get_blocks(self.fs, self.number, blks):
+		if ext2fs_get_blocks(self.extfs.fs, self.number, blks):
 			raise ExtException("Can't get blocks for inode!")
 
 		blocks = []
@@ -116,43 +116,35 @@ cdef class ExtInode:
 
 	cpdef block_iterate(self, func, flags = 0):
 		# This is a little tricky.
-		# We create a context list that will be passed to
+		# We create a context tuple that will be passed to
 		# 'block_iterate_wrapper'.
 		# This makes it possible for block_iterate_wrapper to access
-		# the user-provided callback function and propagate any exceptions
-		# that it raises by appending them to this list.
-		context = [func]
+		# our ExtFS and the user-provided callback function and to
+		# propagate any exceptions that it raises by appending them
+		# to context[2]
+		context = (self.extfs, func, [])
 
-		ret = ext2fs_block_iterate(self.fs, self.number, flags, NULL,
+		ret = ext2fs_block_iterate(self.extfs.fs, self.number, flags, NULL,
 									block_iterate_wrapper, <void *>context)
 
-		if len(context) == 2:
-			raise context[1]
+		if context[2]:
+			raise context[2].pop()
 
 		return ret == 0
 
 cdef int \
 block_iterate_wrapper(ext2_filsys fs, blk_t *blknr, int blkcnt, void *context):
-	# XXX Ugly! Should make ExtInodes have a reference to their ExtFS and
-	# block_iterate pass this reference to block_iterate_wrapper as part of the
-	# context!
-	filesystem = ExtFS()
-	filesystem.fs = fs
+	extfs, func, exc = (<object> context)
 
-	func = (<object> context)[0]
 	try:
 		# TODO - Support altering the block and returning BLOCK_CHANGED
-		ret = func(filesystem, blknr[0], blkcnt)
+		ret = func(extfs, blknr[0], blkcnt)
 		if ret or ret is None:
 			ret = BLOCK_SUCCESS
 		else:
 			ret = BLOCK_ABORT
 	except Exception as err:
-		(<object> context).append(err)
+		exc.append(err)
 		ret = BLOCK_ERROR
-
-	# XXX Uglier! Set the dummy filesystem's fs handle to NULL so that its
-	# close() method doesn't get called in its __dealloc__.
-	filesystem.fs = NULL
 
 	return ret
