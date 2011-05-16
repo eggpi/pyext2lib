@@ -149,7 +149,7 @@ block_iterate_wrapper(ext2_filsys fs, blk_t *blknr, int blkcnt, void *context):
 			ret = BLOCK_ABORT
 	except Exception as err:
 		(<object> context).append(err)
-		return BLOCK_ERROR
+		ret = BLOCK_ERROR
 
 	# XXX Uglier! Set the dummy filesystem's fs handle to NULL so that its
 	# close() method doesn't get called in its __dealloc__.
