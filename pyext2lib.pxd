@@ -62,9 +62,6 @@ cdef extern from "ext2fs/ext2fs.h":
 										int blockcnt, void	*private),
 							void *private)
 
-	int ext2fs_file_open (ext2_filsys fs, ext2_ino_t ino, int flags,
-							ext2_file_t *ret)
-	int ext2fs_file_close(ext2_file_t file)
 	int ext2fs_file_get_size (ext2_file_t file)
 
 cdef class ExtFS:
@@ -91,13 +88,6 @@ cdef class ExtInode:
 	cdef readonly int number
 	cdef ext2_inode inode
 
-	cpdef open(self, flags = ?)
 	cpdef check_directory(self)
 	cpdef get_blocks(self)
 	cpdef block_iterate(self, func, flags = ?)
-
-cdef class ExtFile(ExtInode):
-	cdef ext2_file_t file
-
-	cpdef close(self)
-	cpdef get_size(size)
