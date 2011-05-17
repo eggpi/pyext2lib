@@ -9,9 +9,13 @@ cdef extern from "ext2fs/ext2fs.h":
 	cdef struct ext2_inode:
 		pass
 
+	cdef struct ext2_file:
+		pass
+
 	cdef struct ext2_struct_inode_scan:
 		pass
 
+	ctypedef ext2_file *ext2_file_t
 	ctypedef struct_ext2_filsys *ext2_filsys
 	ctypedef struct_io_manager *io_manager
 	ctypedef ext2_struct_inode_scan *ext2_inode_scan
@@ -43,6 +47,7 @@ cdef extern from "ext2fs/ext2fs.h":
 
 	int ext2fs_get_blocks(ext2_filsys fs, ext2_ino_t ino, blk_t *blocks)
 	int ext2fs_inode_has_valid_blocks(ext2_inode *inode)
+	int ext2fs_check_directory (ext2_filsys fs, ext2_ino_t ino)
 
 	enum:
 		EXT2_NDIR_BLOCKS = 12
@@ -56,6 +61,11 @@ cdef extern from "ext2fs/ext2fs.h":
 							int (*func)(ext2_filsys fs, blk_t *blocknr,
 										int blockcnt, void	*private),
 							void *private)
+
+	int ext2fs_file_open (ext2_filsys fs, ext2_ino_t ino, int flags,
+							ext2_file_t *ret)
+	int ext2fs_file_close(ext2_file_t file)
+	int ext2fs_file_get_size (ext2_file_t file)
 
 cdef class ExtFS:
 	# XXX - Can't be instantiated directly as that leaves self.fs as NULL,
@@ -81,6 +91,13 @@ cdef class ExtInode:
 	cdef readonly int number
 	cdef ext2_inode inode
 
+	cpdef open(self, flags = ?)
+	cpdef check_directory(self)
 	cpdef get_blocks(self)
 	cpdef block_iterate(self, func, flags = ?)
 
+cdef class ExtFile(ExtInode):
+	cdef ext2_file_t file
+
+	cpdef close(self)
+	cpdef get_size(size)

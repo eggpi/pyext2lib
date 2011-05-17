@@ -101,8 +101,17 @@ cdef class ExtFSInodeIter:
 		return ret
 
 cdef class ExtInode:
-	def __cinit__(self, ExtFS extfs):
+	def __init__(self, ExtFS extfs):
 		self.extfs = extfs
+
+	cpdef open(self, flags = 0):
+		if self.check_directory():
+			raise NotImplemented("Can't open directories yet!")
+
+		return ExtFile(self.extfs, self, flags)
+
+	cpdef check_directory(self):
+		return ext2fs_check_directory(self.extfs.fs, self.number) == 0
 
 	cpdef get_blocks(self):
 		cdef blk_t blks[EXT2_N_BLOCKS]
@@ -156,3 +165,27 @@ block_iterate_wrapper(ext2_filsys fs, blk_t *blknr, int blkcnt, void *context):
 		ret = BLOCK_ERROR
 
 	return ret
+
+cdef class ExtFile(ExtInode):
+	# TODO Add flags
+	# TODO Implement I/O
+	def __init__(self, ExtFS extfs, ExtInode ino, flags = 0):
+		ExtInode.__init__(self, extfs)
+
+		self.number = ino.number
+		self.inode = ino.inode
+		if ext2fs_file_open(extfs.fs, ino.number, flags, &self.file):
+			raise ExtException("Can't open file!")
+
+	def __dealloc__(self):
+		if self.file:
+			self.close()
+
+	cpdef close(self):
+		if ext2fs_file_close(self.file):
+			raise ExtException("Can't close file!")
+
+		self.file = NULL
+
+	cpdef get_size(self):
+		return ext2fs_file_get_size(self.file)
