@@ -5,25 +5,19 @@ include "pyext2lib.pxi"
 class ExtException(Exception):
 	pass
 
-cpdef open(name, iomanager, flags = 0, superblock = 0, block_size = 0):
-	cdef ext2_filsys fs
-	cdef io_manager iom
-
-	if iomanager == IO_MANAGER_UNIX:
-		iom = unix_io_manager
-	else:
-		# TODO - Fill in other io managers
-		raise ExtException("Unrecognized IO manager!")
-
-	if ext2fs_open(name, flags, superblock, block_size, iom, &fs):
-		raise ExtException("Can't open filesystem! Are you root?")
-
-	filesystem = ExtFS()
-	filesystem.fs = fs
-
-	return filesystem
-
 cdef class ExtFS:
+	def __init__(self, name, iomanager, flags=0, superblock=0, block_size=0):
+		cdef io_manager iom
+
+		if iomanager == IO_MANAGER_UNIX:
+			iom = unix_io_manager
+		else:
+			# TODO - Fill in other io managers
+			raise ExtException("Unrecognized IO manager!")
+
+		if ext2fs_open(name, flags, superblock, block_size, iom, &self.fs):
+			raise ExtException("Can't open filesystem! Are you root?")
+
 	def __dealloc__(self):
 		if self.fs:
 			self.close()
@@ -57,13 +51,7 @@ cdef class ExtFS:
 		return ExtFSInodeIter(self, flags)
 
 	cpdef read_inode(self, ino):
-		inode = ExtInode(self)
-
-		inode.number = ino
-		if ext2fs_read_inode(self.fs, ino, &inode.inode):
-			raise ExtException("Can't get inode!")
-
-		return inode
+		return ExtInode(self, ino)
 
 	property device_name:
 		def __get__(self):
@@ -90,25 +78,30 @@ cdef class ExtFSInodeIter:
 		return self
 
 	def __next__(self):
-		ret = ExtInode(self.extfs)
+		cdef ext2_ino_t inumber
+		cdef ext2_inode inode
 
-		if ext2fs_get_next_inode(self.scan, &ret.number, &ret.inode):
+		if ext2fs_get_next_inode(self.scan, &inumber, &inode):
 			raise ExtException("Can't get next inode!")
 
-		if ret.number == 0:
+		if inumber == 0:
 			raise StopIteration
 
-		return ret
+		return ExtInode(self.extfs, inumber)
 
 cdef class ExtInode:
-	def __init__(self, ExtFS extfs):
+	def __init__(self, ExtFS extfs, inumber):
 		self.extfs = extfs
+		self.number = inumber
+
+		if ext2fs_read_inode(self.extfs.fs, inumber, &self.inode):
+			raise ExtException("Can't get inode!")
 
 	cpdef open(self, flags = 0):
 		if self.check_directory():
 			raise NotImplemented("Can't open directories yet!")
 
-		return ExtFile(self.extfs, self, flags)
+		return ExtFile(self.extfs, self.number, flags)
 
 	cpdef check_directory(self):
 		return ext2fs_check_directory(self.extfs.fs, self.number) == 0
@@ -169,12 +162,10 @@ block_iterate_wrapper(ext2_filsys fs, blk_t *blknr, int blkcnt, void *context):
 cdef class ExtFile(ExtInode):
 	# TODO Add flags
 	# TODO Implement I/O
-	def __init__(self, ExtFS extfs, ExtInode ino, flags = 0):
-		ExtInode.__init__(self, extfs)
+	def __init__(self, ExtFS extfs, ino, flags = 0):
+		ExtInode.__init__(self, extfs, ino)
 
-		self.number = ino.number
-		self.inode = ino.inode
-		if ext2fs_file_open(extfs.fs, ino.number, flags, &self.file):
+		if ext2fs_file_open(extfs.fs, ino, flags, &self.file):
 			raise ExtException("Can't open file!")
 
 	def __dealloc__(self):
