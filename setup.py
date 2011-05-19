@@ -17,7 +17,7 @@ ext_modules=[
 ]
 
 setup(
-	name = "deviceinfo_ext2",
+	name = "pyext2lib",
 	cmdclass = cmdclass,
 	ext_modules = ext_modules
 )
