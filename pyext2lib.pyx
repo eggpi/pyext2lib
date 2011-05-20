@@ -1,5 +1,7 @@
-from pyext2lib cimport *
+from math import ceil
+from libc.stdlib cimport *
 
+from pyext2lib cimport *
 include "pyext2lib.pxi"
 
 class ExtException(Exception):
@@ -33,6 +35,10 @@ cdef class ExtFS:
 	cpdef read_bitmaps(self):
 		if ext2fs_read_bitmaps(self.fs):
 			raise ExtException("Can't read bitmaps!")
+
+	cpdef get_block_bitmap_range(self, start, end):
+		# TODO - Require reading the block bitmap first
+		return ExtBlockBitmap(self, start, end)
 
 	cpdef flush(self):
 		if ext2fs_flush(self.fs):
@@ -152,3 +158,40 @@ block_iterate_wrapper(ext2_filsys fs, blk_t *blknr, int blkcnt, void *context):
 		ret = BLOCK_ERROR
 
 	return ret
+
+cdef class ExtBlockBitmap(dict):
+	def __init__(self, ExtFS extfs, start, end):
+		dict.__init__(self)
+
+		self.extfs = extfs
+		self.start = start
+		self.end = end
+
+		self.bmap = <char *> malloc(ceil(end -start +1) / 8)
+
+		if self.bmap == NULL:
+			raise RuntimeError("Can't allocate block bitmap!")
+
+		err = ext2fs_get_block_bitmap_range(extfs.fs.block_map,
+											start,
+											end -start +1,
+											self.bmap);
+		if err:
+			print err
+			raise ExtException("Can't get block bitmap!")
+
+	def __dealloc__(self):
+		free(self.bmap)
+		self.bmap = NULL
+
+	def __missing__(self, key):
+		if self.start <= key <= self.end:
+			status = bool(ext2fs_test_bit(key -self.start, self.bmap))
+			self[key] = status
+
+			return status
+
+		raise IndexError("Requested block outside bitmap!")
+
+	cpdef block_is_used(self, block):
+		return self[block]

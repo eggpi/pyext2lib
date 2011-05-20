@@ -2,10 +2,6 @@ cdef extern from "ext2fs/ext2fs.h":
 	cdef struct struct_io_manager:
 		pass
 
-	cdef struct struct_ext2_filsys:
-		char *device_name
-		unsigned int blocksize
-
 	cdef struct ext2_inode:
 		pass
 
@@ -14,6 +10,14 @@ cdef extern from "ext2fs/ext2fs.h":
 
 	cdef struct ext2_struct_inode_scan:
 		pass
+
+	cdef struct ext2fs_block_bitmap:
+		pass
+
+	cdef struct struct_ext2_filsys:
+		char *device_name
+		unsigned int blocksize
+		ext2fs_block_bitmap block_map
 
 	ctypedef ext2_file *ext2_file_t
 	ctypedef struct_ext2_filsys *ext2_filsys
@@ -62,7 +66,10 @@ cdef extern from "ext2fs/ext2fs.h":
 										int blockcnt, void	*private),
 							void *private)
 
-	int ext2fs_file_get_size (ext2_file_t file)
+	int ext2fs_get_block_bitmap_range(ext2fs_block_bitmap bmap,
+									blk_t start, unsigned int num,
+									void *out)
+	int ext2fs_test_bit(int bit, void *bmap)
 
 cdef class ExtFS:
 	# XXX - Can't be instantiated directly as that leaves self.fs as NULL,
@@ -74,6 +81,7 @@ cdef class ExtFS:
 	cpdef read_block_bitmap(self)
 	cpdef read_inode_bitmap(self)
 	cpdef read_bitmaps(self)
+	cpdef get_block_bitmap_range(self, start, end)
 	cpdef flush(self)
 	cpdef close(self)
 	cpdef iterinodes(self, flags = ?)
@@ -91,3 +99,11 @@ cdef class ExtInode:
 	cpdef check_directory(self)
 	cpdef get_blocks(self)
 	cpdef block_iterate(self, func, flags = ?)
+
+cdef class ExtBlockBitmap(dict):
+	cdef char *bmap
+	cdef ExtFS extfs
+	cdef object start
+	cdef object end
+
+	cpdef block_is_used(self, block)
