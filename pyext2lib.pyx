@@ -67,6 +67,10 @@ cdef class ExtFS:
 		def __get__(self):
 			return self.fs.blocksize
 
+	property group_desc_count:
+		def __get__(self):
+			return self.fs.group_desc_count
+
 	property s_inodes_count:
 		def __get__(self):
 			return self.fs.super.s_inodes_count

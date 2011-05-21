@@ -27,6 +27,7 @@ cdef extern from "ext2fs/ext2fs.h":
 		char *device_name
 		ext2_super_block *super
 		unsigned int blocksize
+		unsigned int group_desc_count
 		ext2fs_block_bitmap block_map
 
 	ctypedef ext2_file *ext2_file_t
