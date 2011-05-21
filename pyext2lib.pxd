@@ -72,10 +72,6 @@ cdef extern from "ext2fs/ext2fs.h":
 	int ext2fs_test_bit(int bit, void *bmap)
 
 cdef class ExtFS:
-	# XXX - Can't be instantiated directly as that leaves self.fs as NULL,
-	# making all methods segfault. Instantiate only through open() or fix
-	# this later.
-
 	cdef ext2_filsys fs
 
 	cpdef read_block_bitmap(self)
