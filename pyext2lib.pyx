@@ -209,7 +209,6 @@ cdef class ExtBlockBitmap(dict):
 											end -start +1,
 											self.bmap);
 		if err:
-			print err
 			raise ExtException("Can't get block bitmap!")
 
 	def __dealloc__(self):

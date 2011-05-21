@@ -110,7 +110,7 @@ cdef class ExtInode:
 cdef class ExtBlockBitmap(dict):
 	cdef char *bmap
 	cdef ExtFS extfs
-	cdef object start
-	cdef object end
+	cdef readonly object start
+	cdef readonly object end
 
 	cpdef block_is_used(self, block)
