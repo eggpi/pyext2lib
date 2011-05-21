@@ -14,8 +14,17 @@ cdef extern from "ext2fs/ext2fs.h":
 	cdef struct ext2fs_block_bitmap:
 		pass
 
+	cdef struct ext2_super_block:
+		int s_inodes_count
+		int s_blocks_count
+		int s_r_blocks_count
+		int s_free_blocks_count
+		int s_free_inodes_count
+		int s_first_data_block
+
 	cdef struct struct_ext2_filsys:
 		char *device_name
+		ext2_super_block *super
 		unsigned int blocksize
 		ext2fs_block_bitmap block_map
 

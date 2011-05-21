@@ -67,6 +67,30 @@ cdef class ExtFS:
 		def __get__(self):
 			return self.fs.blocksize
 
+	property s_inodes_count:
+		def __get__(self):
+			return self.fs.super.s_inodes_count
+
+	property s_blocks_count:
+		def __get__(self):
+			return self.fs.super.s_blocks_count
+
+	property s_r_blocks_count:
+		def __get__(self):
+			return self.fs.super.s_r_blocks_count
+
+	property s_free_blocks_count:
+		def __get__(self):
+			return self.fs.super.s_free_blocks_count
+
+	property s_free_inodes_count:
+		def __get__(self):
+			return self.fs.super.s_free_inodes_count
+
+	property s_first_data_block:
+		def __get__(self):
+			return self.fs.super.s_first_data_block
+
 cdef class ExtFSInodeIter:
 	def __cinit__(self, ExtFS extfs, flags):
 		self.extfs = extfs
