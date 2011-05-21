@@ -82,6 +82,12 @@ cdef extern from "ext2fs/ext2fs.h":
 									void *out)
 	int ext2fs_test_bit(int bit, void *bmap)
 
+	int ext2fs_group_first_block(ext2_filsys fs, int group)
+	int ext2fs_group_last_block(ext2_filsys fs, int group)
+
+	int ext2fs_group_of_blk(ext2_filsys fs, int blk)
+	int ext2fs_group_of_ino(ext2_filsys fs, int ino)
+
 cdef class ExtFS:
 	cdef ext2_filsys fs
 
@@ -93,6 +99,10 @@ cdef class ExtFS:
 	cpdef close(self)
 	cpdef iterinodes(self, flags = ?)
 	cpdef read_inode(self, ino)
+	cpdef group_first_block(self, group)
+	cpdef group_last_block(self, group)
+	cpdef group_of_block(self, block)
+	cpdef group_of_inode(self, inode)
 
 cdef class ExtFSInodeIter:
 	cdef ExtFS extfs

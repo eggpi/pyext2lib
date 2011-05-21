@@ -59,6 +59,18 @@ cdef class ExtFS:
 	cpdef read_inode(self, ino):
 		return ExtInode(self, ino)
 
+	cpdef group_first_block(self, group):
+		return ext2fs_group_first_block(self.fs, group)
+
+	cpdef group_last_block(self, group):
+		return ext2fs_group_last_block(self.fs, group)
+
+	cpdef group_of_block(self, block):
+		return ext2fs_group_of_blk(self.fs, block)
+
+	cpdef group_of_inode(self, inode):
+		return ext2fs_group_of_ino(self.fs, inode)
+
 	property device_name:
 		def __get__(self):
 			return self.fs.device_name
