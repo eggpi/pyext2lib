@@ -21,6 +21,7 @@ cdef extern from "ext2fs/ext2fs.h":
 		int s_free_blocks_count
 		int s_free_inodes_count
 		int s_first_data_block
+		int s_blocks_per_group
 
 	cdef struct struct_ext2_filsys:
 		char *device_name

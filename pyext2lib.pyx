@@ -91,6 +91,10 @@ cdef class ExtFS:
 		def __get__(self):
 			return self.fs.super.s_first_data_block
 
+	property s_blocks_per_group:
+		def __get__(self):
+			return self.fs.super.s_blocks_per_group
+
 cdef class ExtFSInodeIter:
 	def __cinit__(self, ExtFS extfs, flags):
 		self.extfs = extfs
