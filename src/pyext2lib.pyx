@@ -4,7 +4,13 @@ from libc.stdlib cimport *
 from pyext2lib cimport *
 include "pyext2lib.pxi"
 
+"""
+pyext2lib: Thin Python bindings over ext2lib.
+Currently provides read-only access to a filesystem and its inodes.
+"""
+
 class ExtException(Exception):
+	""" Custom exception raised when the underlying Ext2lib functions fail. """
 	pass
 
 cdef class ExtFS:
@@ -28,7 +34,7 @@ cdef class ExtFS:
 	"""
 
 	def __init__(self, name, iomanager, flags=0, superblock=0, block_size=0):
-		""" Please se the class documentation for signature. """
+		""" Please see the class documentation for signature. """
 
 		cdef io_manager iom
 
@@ -293,7 +299,7 @@ cdef class ExtInode:
 		""" Returns True or False whether or not this inode represents a
 		directory.
 
-		For more information, please se ext2fs_check_directory() in the
+		For more information, please see ext2fs_check_directory() in the
 		e2fsprogs documentation.
 		"""
 

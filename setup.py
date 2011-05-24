@@ -4,10 +4,10 @@ from distutils.extension import Extension
 try:
 	from Cython.Distutils import build_ext
 except ImportError:
-	files = ["precompiled/pyext2lib.c"]
+	files = ["src/precompiled/pyext2lib.c"]
 	cmdclass = {}
 else:
-	files = ["pyext2lib.pyx"]
+	files = ["src/pyext2lib.pyx"]
 	cmdclass = {"build_ext" : build_ext}
 
 ext_modules=[
