@@ -40,10 +40,10 @@ BLOCK_FLAG_DATA_ONLY = 4
 BLOCK_FLAG_READ_ONLY = 8
 
 # Return flags for the block iterator functions
-BLOCK_SUCCESS = 0
 BLOCK_CHANGED = 1
 BLOCK_ABORT	= 2
 BLOCK_ERROR	= 4
+BLOCK_SUCCESS = 5
 
 # Magic "block count" return values for the block iterator function.
 BLOCK_COUNT_IND = -1
