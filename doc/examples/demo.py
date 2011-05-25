@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #	Copyright 2011, Guilherme Gonçalves (guilherme.p.gonc@gmail.com)
 #	This file is part of PyExt2lib.
 #
