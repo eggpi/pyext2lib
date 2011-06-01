@@ -16,9 +16,6 @@
 #	along with PyExt2lib.  If not, see <http://www.gnu.org/licenses/>.
 
 import sys
-import collections
-import itertools
-
 import pyext2lib
 
 def count_inodes_blocks(fs):
@@ -37,53 +34,6 @@ def count_inodes_blocks(fs):
 		inodes += 1
 
 	return (inodes, blocks.pop())
-
-Segment = collections.namedtuple("Segment", "start size")
-
-def iter_group_block_bitmaps(fs):
-	""" Generator for the block bitmaps of all groups """
-
-	group = 0
-	while group < fs.group_desc_count:
-		group_start = fs.group_first_block(group)
-		group_end = fs.group_last_block(group)
-
-		bmap = fs.get_block_bitmap_range(group_start, group_end)
-
-		yield bmap
-		group += 1
-
-def iter_free_blocks(fs):
-	""" Returns an iterator over all free blocks in a filesystem. """
-
-	return itertools.chain.from_iterable(
-		itertools.ifilterfalse(b.block_is_used, xrange(b.start, b.end +1))
-		for b in iter_group_block_bitmaps(fs))
-
-def find_segments(it):
-	""" Finds segments in an iterable. """
-
-	segments = collections.deque()
-
-	try:
-		last = first = next(it)
-	except StopIteration:
-		return segments
-
-	for n in it:
-		if n == last + 1:
-			last += 1
-		else:
-			seg = Segment(first, last - first +1)
-			segments.append(seg)
-
-			first = last = n
-
-	# Since each segment is added when the next starts,
-	# the last segment has to be added explicitly
-	segments.append(Segment(first, last - first +1))
-
-	return segments
 
 if __name__ == "__main__":
 	if len(sys.argv) < 2:
@@ -110,21 +60,8 @@ if __name__ == "__main__":
 	print "Blocks per group:", fs.s_blocks_per_group
 	print
 
-	# Then, read the block bitmap.
-	# We have to do this before using bitmaps.
-	fs.read_block_bitmap()
-
+	# Count the number of inodes and blocks int the filesystem
 	inodes, blocks = count_inodes_blocks(fs)
 	print "Seen %d inodes and %d blocks" % (inodes, blocks)
-
-	# Then we generate a list of segments of free blocks.
-	# Technically this is a deque of namedtuples, where for each namedtuple t,
-	# t.start is the first block of the segment, and t.size is the size of that
-	# semgent, so that the segment comprises blocks [t.start, t.start + t.end -1]
-
-	free_seg_list = find_segments(iter_free_blocks(fs))
-
-	# Should match the count in the superblock displayed above in a perfect world.
-	print "Total free blocks:", sum(seg.size for seg in free_seg_list)
 
 	fs.close()
