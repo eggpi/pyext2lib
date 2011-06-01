@@ -395,7 +395,7 @@ block_iterate_wrapper(ext2_filsys fs, blk_t *blknr, int blkcnt, void *context):
 		# TODO - Support altering the block and returning BLOCK_CHANGED
 		ret = func(extfs, blknr[0], blkcnt)
 		if ret or ret is None:
-			ret = BLOCK_SUCCESS
+			ret = 0
 		else:
 			ret = BLOCK_ABORT
 	except Exception as err:
