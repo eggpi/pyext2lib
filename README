@@ -1,0 +1,46 @@
+Copyright 2010, 2011 Guilherme Gonçalves (guilherme.p.gonc@gmail.com)
+
+PyExt2lib provides Python bindings to the ext2fslib, as provided by the
+e2fsprogs [1] package.
+PyExt2lib is written in Cython [2] and comes with a precompiled C file, so it
+doesn't require the Cython compiler to be installed.
+
+PyExt2lib can be compiled to run with any Python version supported by Cython.
+
+This project was started to support the development of a filesystem analysis
+tool for the Operating Systems course (MC514) at UNICAMP.
+For that reason, PyExt2lib only provides bindings for the functionality needed
+by this tool, is grossly incomplete and unfit for many uses. In particular,
+PyExt2lib only provides read-only acces to the filesystem.
+You have been warned :)
+
+In order to install PyExt2lib, use the included setup.py script, as such:
+$ python setup.py install
+The module will be called 'pyext2lib'
+
+For licensing information, please see the included COPYING file.
+
+Sample usage:
+
+(on a Python terminal with root privileges)
+>>> import pyext2lib
+>>> fs = pyext2lib.ExtFS('/dev/sda1', pyext2lib.IO_MANAGER_UNIX) # (1)
+>>> root = pyext2lib.ExtInode(fs, 2) # (2)
+>>> root.check_directory() # (3)
+True
+>>> blocks = []
+>>> callback = lambda fs, blk, blkcnt: blocks.append(blk)
+>>> root.block_iterate(callback) # (4)
+True
+>>> print blocks # (5)
+[4307L]
+
+(1) Open the filesystem at /dev/sda1.
+(2) Get the inode 2, corresponding to the root of the filesystem.
+(3) Check that it really is a directory.
+(4) Iterate over all blocks referenced by the root inode and append them to a
+list of blocks in a callback function.
+(5) The list of blocks.
+
+This repository contains further examples and Doxygen files in its doc/
+directory.
