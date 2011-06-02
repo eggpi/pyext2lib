@@ -44,3 +44,7 @@ list of blocks in a callback function.
 
 This repository contains further examples and Doxygen files in its doc/
 directory.
+
+References
+1 - http://e2fsprogs.sourceforge.net/
+2 - http://cython.org
